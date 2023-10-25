@@ -33,10 +33,11 @@ puntosDestino=np.array(puntosDestino,dtype=np.int32)
 #aplicamos a homografía a xanela
 h,status=cv2.findHomography(puntosOrixe,puntosDestino)
 
-Kernel=(9,9)
+Kernel=(5,5)
 k1=cv2.getStructuringElement(cv2.MORPH_ELLIPSE,Kernel)
 
 #reproducimos o video coa homografia aplicada
+cv2.namedWindow("sobel derivada")
 cv2.namedWindow("xanela granxa")
 while True:
     ret,frame=cap.read()
@@ -53,17 +54,21 @@ while True:
 
     #se hai moita luz, aplicamos erosion
     if mediaLuz>100:
+        limiar=30
         frameCorrixido=cv2.erode(imaxeDestino,k1)
 
     else:
+        limiar=15
         frameCorrixido=cv2.dilate(imaxeDestino,k1)
-    
-    #aplicamos un suavizado gaussiano o frame
-    frameCorrixido=cv2.cvtColor(frameCorrixido,cv2.COLOR_BGR2GRAY)
-    frameGaussiano=cv2.GaussianBlur(frameCorrixido,(3,3),0,0)
-    bordeXanela=cv2.Laplacian(frameGaussiano,cv2.CV_32F, ksize = 3,scale = 1, delta = 0)
 
-    cv2.imshow("xanela granxa",bordeXanela)
+    # #aplicamos un suavizado gaussiano o frame
+    frameCorrixido=cv2.cvtColor(frameCorrixido,cv2.COLOR_BGR2GRAY)
+    bordeXanela=cv2.Sobel(frameCorrixido,cv2.CV_8UC1,0,1,ksize=1)
+    #bordeXanela=cv2.threshold(bordeXanela,limiar,255,cv2.THRESH_BINARY)[1]
+    bordeXanela=cv2.adaptiveThreshold(bordeXanela, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 5, 2)
+
+    cv2.imshow("sobel derivada",bordeXanela)
+    cv2.imshow("xanela granxa",imaxeDestino)
 
     if cv2.waitKey(1000//60)==113:
         print("rematando sesion")
