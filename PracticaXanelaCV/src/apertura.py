@@ -35,8 +35,9 @@ Kernel = (5, 5)
 k1 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, Kernel)
 filtroHorizontal=np.array([[-1,-2,-1],[0,0,0],[1,2,1]])
 
+frameCount=0
+
 # Reproducimos el video con la homografía aplicada
-cv2.namedWindow("canny derivada")
 cv2.namedWindow("xanela granxa")
 while True:
     ret, frame = cap.read()
@@ -65,7 +66,6 @@ while True:
     frameCorrixido = cv2.GaussianBlur(frameCorrixido, (9, 9), 2)
 
     bordeXanela = cv2.Canny(frameCorrixido, threshold1=limiar,threshold2=limiar * 3)
-    bordeXanela = cv2.filter2D(bordeXanela, cv2.CV_8U, filtroHorizontal)
     bordesY, bordesX = np.where(bordeXanela != 0)
 
     # Aplicar la transformada de Hough a los bordes
@@ -92,21 +92,27 @@ while True:
             distancia=255-y0
             distancias.append(distancia)
 
+
     if len(distancias)>0:
         meanD=np.mean(distancias)
         aberta=(meanD/255)*100
         cerrada=100-aberta
 
-        if cerrada>94 and len(lineas)<=3:
+        if cerrada>92.5 and len(lineas)<=2:
             aberta=0
 
         cerrada=100-aberta
 
-    print("Porcentaxe de ventana pechada: {}%".format(round(cerrada,2)))
-    print("Porcentaxe de apertura: {}".format(round(aberta,2)))
+        cerrada=round(cerrada,2)
+        aberta=round(aberta,2)
 
-    cv2.imshow("canny derivada", bordeXanela)
+    imaxeDestino = cv2.putText(imaxeDestino, "pechada: ", (365, 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 128),2, cv2.LINE_AA, False)
+    imaxeDestino = cv2.putText(imaxeDestino, "aberta: ", (365, 50),cv2.FONT_HERSHEY_SIMPLEX , 0.5, (128, 0, 128),2, cv2.LINE_AA, False)
+    imaxeDestino = cv2.putText(imaxeDestino, str(cerrada)+'%', (445, 25),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (128, 0, 128),2, cv2.LINE_AA, False)
+    imaxeDestino = cv2.putText(imaxeDestino, str(aberta)+'%', (445, 50),cv2.FONT_HERSHEY_SIMPLEX , 0.5, (128, 0, 128),2, cv2.LINE_AA, False)
+
     cv2.imshow("xanela granxa", imaxeDestino)
+    frameCount+=1
 
     if cv2.waitKey(1000 // 60) == 113:
         print("rematando sesión")
