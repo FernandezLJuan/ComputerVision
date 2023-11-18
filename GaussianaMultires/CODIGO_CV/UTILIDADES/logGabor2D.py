@@ -258,10 +258,7 @@ def loggabor(img, nscale=4, norient=6, minWaveLength=3, mult=2.1, sigmaOnf=0.55,
             respostas.append(np.real(thisEO))
 
 
-    orixinal=np.sum(respostas,axis=0)
-    print(orixinal)
-    orixinal=cv2.cvtColor(respostas,cv2.COLOR_BGR2RGB)
-    plt.imshow(orixinal)
+    plt.imshow(sum(filtros),cmap="gray")
     plt.show()
 
 def main(args):
